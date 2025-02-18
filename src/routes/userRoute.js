@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const signup_1 = require("../controller/authentication/signup");
+const signin_1 = require("../controller/authentication/signin");
+const multer_1 = require("../middleware/multer");
+const processPdf_1 = require("../controller/pdfProcess/processPdf");
+const router = (0, express_1.Router)();
+router.post("/signup", signup_1.signup);
+router.post("/signin", signin_1.sigin);
+router.post('/process-pdf', multer_1.pdfUpload, processPdf_1.processPdf);
+exports.default = router;
