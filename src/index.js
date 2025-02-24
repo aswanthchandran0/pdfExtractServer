@@ -13,7 +13,7 @@ dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT;
 app.use((0, cors_1.default)({
-    origin: "http://localhost:5173",
+    origin: process.env.CLIENT_SIDE_URI,
     methods: ["GET", "POST", "PUT", "DELETE"], // Allowed methods
     credentials: true // Allow cookies and authentication headers
 }));
