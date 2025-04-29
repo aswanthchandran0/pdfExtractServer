@@ -1,9 +1,10 @@
-import { Request, Response, NextFunction } from 'express';
-import { PDFDocument } from 'pdf-lib';
-import { pdfUpload } from '../../middleware/multer';
-import { extractPages } from './extractPages';
-import { join } from 'path';
-import { writeFileSync } from 'fs';
+import { Request, Response, NextFunction } from "express";
+import { PDFDocument } from "pdf-lib";
+import { pdfUpload } from "../../middleware/multer";
+import { extractPages } from "./extractPages";
+import { join } from "path";
+import { writeFileSync } from "fs";
+import { existsSync, mkdirSync } from "fs";
 
 interface CustomRequest extends Request {
   file?: Express.Multer.File;
@@ -16,11 +17,11 @@ export const processPdf = async (
 ): Promise<void> => {
   try {
     if (!req.file) {
-      res.status(400).json({ error: 'No PDF file uploaded' });
+      res.status(400).json({ error: "No PDF file uploaded" });
       return;
     }
     if (!req.body.pages) {
-      res.status(400).json({ error: 'No pages selected' });
+      res.status(400).json({ error: "No pages selected" });
       return;
     }
 
@@ -30,16 +31,26 @@ export const processPdf = async (
 
     // Process the PDF to extract selected pages
     const processedPdf = await extractPages(pdfBuffer, selectedPages);
-    console.log('Processed PDF Buffer:', processedPdf);
-    console.log('Buffer Length:', processedPdf.length);
+    console.log("Processed PDF Buffer:", processedPdf);
+    console.log("Buffer Length:", processedPdf.length);
+
+    // Ensure the temp folder exists
+    const tempFolderPath = join(__dirname, "temp");
+    if (!existsSync(tempFolderPath)) {
+      mkdirSync(tempFolderPath, { recursive: true });
+    }
 
     // Save the processed PDF to a temporary file for testing
-    const tempFilePath = join(__dirname, 'temp', `extracted_${req.file.originalname}`);
+    const tempFilePath = join(
+      __dirname,
+      "temp",
+      `extracted_${req.file.originalname}`
+    );
     writeFileSync(tempFilePath, processedPdf); // Write the buffer to a file
     console.log(`Processed PDF saved to: ${tempFilePath}`);
 
     // Convert the processed PDF buffer to a Base64-encoded string
-    const pdfBase64 = processedPdf.toString('base64');
+    const pdfBase64 = processedPdf.toString("base64");
 
     // Send the Base64-encoded string in the response
     res.json({
